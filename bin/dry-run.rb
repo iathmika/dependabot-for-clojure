@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# coding: utf-8
 # frozen_string_literal: true
 
 # This script is does a full update run for a given repo (optionally for a
@@ -109,7 +110,7 @@ $options = {
   dependency_names: nil,
   branch: nil,
   cache_steps: [],
-  write: false,
+  write: true,
   clone: false,
   lockfile_only: false,
   reject_external_code: false,
@@ -119,15 +120,17 @@ $options = {
   security_advisories: [],
   security_updates_only: false,
   ignore_conditions: [],
-  pull_request: false
+  pull_request: true
 }
 
 unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
   $options[:credentials] << {
     "type" => "git_source",
     "host" => "github.com",
+    #"username" => "x-access-token",
     "username" => "x-access-token",
     "password" => ENV["LOCAL_GITHUB_ACCESS_TOKEN"]
+    #"password" => "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"
   }
 end
 
@@ -270,6 +273,7 @@ def cached_read(name)
 
   cache_path = File.join("tmp", $repo_name.split("/"), "cache", "#{name}.bin")
   cache_dir = File.dirname(cache_path)
+  puts "cache directory is #{cache_dir}"
   FileUtils.mkdir_p(cache_dir) unless Dir.exist?(cache_dir)
   cached = File.read(cache_path) if File.exist?(cache_path)
   # rubocop:disable Security/MarshalLoad
@@ -451,15 +455,20 @@ StackProf.start(raw: true) if $options[:profile]
 $source = Dependabot::Source.new(
   provider: $options[:provider],
   repo: $repo_name,
+  
   directory: $options[:directory],
+  
   branch: $options[:branch],
+  
   commit: $options[:commit]
 )
 
 always_clone = Dependabot::Utils.
                always_clone_for_package_manager?($package_manager)
-$repo_contents_path = File.expand_path(File.join("tmp", $repo_name.split("/"))) if $options[:clone] || always_clone
 
+#$repo_contents_path = File.expand_path(File.join("tmp", $repo_name.split("/"))) if $options[:clone] || always_clone
+     #  system("git checkout feature/dependabot")
+$repo_contents_path = "/home/dependabot/dependabot-core/tmp/athmika/garnish"
 fetcher_args = {
   source: $source,
   credentials: $options[:credentials],
@@ -483,9 +492,9 @@ $files = if $repo_contents_path
              puts "=> reading cloned repo from #{$repo_contents_path}"
            else
              puts "=> cloning into #{$repo_contents_path}"
-             FileUtils.rm_rf($repo_contents_path)
+            # FileUtils.rm_rf($repo_contents_path)
            end
-           fetcher.clone_repo_contents
+           #fetcher.clone_repo_contents
            if $options[:commit]
              Dir.chdir($repo_contents_path) do
                puts "=> checking out commit #{$options[:commit]}"
@@ -715,7 +724,8 @@ dependencies.each do |dep|
 
   if $options[:write]
     updated_files.each do |updated_file|
-      path = File.join(dependency_files_cache_dir, updated_file.name)
+     # path = File.join(dependency_files_cache_dir, updated_file.name)
+      path = File.join("tmp/athmika/garnish/", updated_file.name)
       puts " => writing updated file ./#{path}"
       dirname = File.dirname(path)
       FileUtils.mkdir_p(dirname) unless Dir.exist?(dirname)
@@ -740,6 +750,8 @@ dependencies.each do |dep|
     end
   end
 
+ 
+
   if $options[:pull_request]
     msg = Dependabot::PullRequestCreator::MessageBuilder.new(
       dependencies: updated_deps,
@@ -750,15 +762,48 @@ dependencies.each do |dep|
       github_redirection_service: Dependabot::PullRequestCreator::DEFAULT_GITHUB_REDIRECTION_SERVICE
     ).message
     puts "Pull Request Title: #{msg.pr_name}"
-    puts "--description--\n#{msg.pr_message}\n--/description--"
+   # puts "--description--\n#{msg.pr_message}\n--/description--"
     puts "--commit--\n#{msg.commit_message}\n--/commit--"
+    
+     Dir.chdir($repo_contents_path) do
+             #  puts "=> checking out commit #{$options[:commit]}"
+              # Dependabot::SharedHelpers.run_shell_command("git checkout #{$options[:commit]}")
+            
+       Dependabot::SharedHelpers.run_shell_command(
+     <<~CMD
+
+git add pom.xml 
+
+         CMD
+       )
+    #    Dependabot::SharedHelpers.run_shell_command(
+    # <<~CMD
+    #  git commit -m \"test message commit\"
+
+    #      CMD
+       #   )
+     system("git commit -m '#{msg.commit_message}'")
+    
+    
+#git commit -m \"#{msg.commit_message}\" 
+ # end
+  end
   end
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end
 
-StackProf.stop if $options[:profile]
-StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
+
+  # diff = Dependabot::SharedHelpers.run_shell_command(
+  #   <<~CMD
+  #    git log
+  #        CMD
+  # )
+  # puts "diff is #{diff}"
+
+
+#StackProf.stop if $options[:profile]
+#StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
 
 # rubocop:enable Metrics/BlockLength
 
