@@ -29,6 +29,7 @@ GEMSPECS = %w(
   hex/dependabot-hex.gemspec
   python/dependabot-python.gemspec
   omnibus/dependabot-omnibus.gemspec
+  lein/dependabot-lein.gemspec
 ).freeze
 
 def run_command(command)

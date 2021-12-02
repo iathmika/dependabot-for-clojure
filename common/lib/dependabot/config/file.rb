@@ -52,7 +52,8 @@ module Dependabot
         "nuget" => "nuget",
         "npm" => "npm_and_yarn",
         "pip" => "pip",
-        "terraform" => "terraform"
+        "terraform" => "terraform",
+        "lein" => "lein"
       }.freeze
 
       def ignore_conditions(cfg)

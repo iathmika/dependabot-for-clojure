@@ -24,7 +24,6 @@ module Dependabot
         Dependabot::Clients::Bitbucket::NotFound,
         Dependabot::Clients::CodeCommit::NotFound
       ].freeze
-
       def self.required_files_in?(_filename_array)
         raise NotImplementedError
       end
@@ -68,9 +67,19 @@ module Dependabot
       def commit
         return source.commit if source.commit
 
-        branch = target_branch || default_branch_for_repo
+        #branch = target_branch || default_branch_for_repo
+        branch = "master"
+               
+        #commitid = `git show --pretty=%H`
+        #puts commit-d
 
-        @commit ||= client_for_provider.fetch_commit(repo, branch)
+
+       #@commit ||= client_for_provider.fetch_commit(repo, branch)
+        @commit ||= "1573ef6361b257087932c542705fe3466d29f55d"
+        #@commit ||= "0d4f9b560899449f5029f619febf1ea95d69b51d"
+        #@commit ||= "121858dcb63e129b98d3c78f42daacabdcf51eea"
+
+        
       rescue *CLIENT_NOT_FOUND_ERRORS
         raise Dependabot::BranchNotFound, branch
       rescue Octokit::Conflict => e
@@ -80,7 +89,8 @@ module Dependabot
       # Returns the path to the cloned repo
       def clone_repo_contents
         @clone_repo_contents ||=
-          _clone_repo_contents(target_directory: repo_contents_path)
+      # _clone_repo_contents(target_directory: repo_contents_path)
+          "/home/dependabot/dependabot-core/tmp/athmika/#{repo}"
       rescue Dependabot::SharedHelpers::HelperSubprocessFailed
         raise Dependabot::RepoNotFound, source
       end
@@ -113,6 +123,7 @@ module Dependabot
 
       def load_cloned_file_if_present(filename)
         path = Pathname.new(File.join(directory, filename)).cleanpath.to_path
+        
         repo_path = File.join(clone_repo_contents, path)
         raise Dependabot::DependencyFileNotFound, path unless File.exist?(repo_path)
 

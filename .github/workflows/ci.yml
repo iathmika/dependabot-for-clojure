@@ -33,6 +33,7 @@ jobs:
         - { path: gradle, name: gradle }
         - { path: hex, name: hex }
         - { path: maven, name: maven }
+        - { path: lein, name: lein }
         - { path: npm_and_yarn, name: npm_and_yarn }
         - { path: nuget, name: nuget }
         - { path: omnibus, name: omnibus }

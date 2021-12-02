@@ -33,6 +33,7 @@
 # - submodules
 # - docker
 # - terraform
+# - lein
 
 # rubocop:disable Style/GlobalVars
 
@@ -62,6 +63,7 @@ $LOAD_PATH << "./npm_and_yarn/lib"
 $LOAD_PATH << "./nuget/lib"
 $LOAD_PATH << "./python/lib"
 $LOAD_PATH << "./terraform/lib"
+$LOAD_PATH << "./lein/lib"
 
 require "bundler"
 ENV["BUNDLE_GEMFILE"] = File.join(__dir__, "../omnibus/Gemfile")
@@ -98,6 +100,7 @@ require "dependabot/npm_and_yarn"
 require "dependabot/nuget"
 require "dependabot/python"
 require "dependabot/terraform"
+require "dependabot/lein"
 
 # GitHub credentials with write permission to the repo you want to update
 # (so that you can create a new branch, commit and pull request).
@@ -468,7 +471,7 @@ always_clone = Dependabot::Utils.
 
 #$repo_contents_path = File.expand_path(File.join("tmp", $repo_name.split("/"))) if $options[:clone] || always_clone
      #  system("git checkout feature/dependabot")
-$repo_contents_path = "/home/dependabot/dependabot-core/tmp/athmika/garnish"
+$repo_contents_path = "/home/dependabot/dependabot-core/tmp/athmika/#{$repo_name}"
 fetcher_args = {
   source: $source,
   credentials: $options[:credentials],
@@ -708,7 +711,7 @@ dependencies.each do |dep|
 
   updater = file_updater_for(updated_deps)
   updated_files = updater.updated_dependency_files
-
+  puts $updated_files 
   # Currently unused but used to create pull requests (from the updater)
   updated_deps.reject do |d|
     next false if d.name == checker.dependency.name
@@ -725,7 +728,7 @@ dependencies.each do |dep|
   if $options[:write]
     updated_files.each do |updated_file|
      # path = File.join(dependency_files_cache_dir, updated_file.name)
-      path = File.join("tmp/athmika/garnish/", updated_file.name)
+      path = File.join("tmp/athmika/#{$repo_name}/", updated_file.name)
       puts " => writing updated file ./#{path}"
       dirname = File.dirname(path)
       FileUtils.mkdir_p(dirname) unless Dir.exist?(dirname)
@@ -744,13 +747,13 @@ dependencies.each do |dep|
       original_file = $files.find { |f| f.name == updated_file.name }
       if original_file
         show_diff(original_file, updated_file)
+        
       else
         puts "added #{updated_file.name}"
       end
     end
   end
 
- 
 
   if $options[:pull_request]
     msg = Dependabot::PullRequestCreator::MessageBuilder.new(
@@ -772,7 +775,7 @@ dependencies.each do |dep|
        Dependabot::SharedHelpers.run_shell_command(
      <<~CMD
 
-git add pom.xml 
+git add project.clj 
 
          CMD
        )
@@ -782,13 +785,15 @@ git add pom.xml
 
     #      CMD
        #   )
-     system("git commit -m '#{msg.commit_message}'")
-    
+       system("git commit -m '#{msg.commit_message}'")
+       fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
+       $files = fetcher.files
     
 #git commit -m \"#{msg.commit_message}\" 
  # end
   end
   end
+ 
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end

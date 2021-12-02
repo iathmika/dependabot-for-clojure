@@ -212,6 +212,22 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && rustup toolchain install 1.51.0 && rustup default 1.51.0
 
 
+### CLOJURE
+USER root
+# Install leiningen
+RUN apt-get update \
+  && apt-get install -y openjdk-8-jre-headless \
+  && java -version \
+  && curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > lein \
+  && mkdir -p /usr/local/lein/bin \
+  && mv lein /usr/local/lein/bin \
+  && chmod +x /usr/local/lein/bin/lein \
+  && /usr/local/lein/bin/lein --version
+
+ENV PATH="$PATH:/usr/local/lein/bin" \
+  LEIN_SNAPSHOTS_IN_RELEASE="yes"
+
+
 ### Terraform
 
 USER root
@@ -233,6 +249,7 @@ COPY --chown=dependabot:dependabot hex/helpers /opt/hex/helpers
 COPY --chown=dependabot:dependabot npm_and_yarn/helpers /opt/npm_and_yarn/helpers
 COPY --chown=dependabot:dependabot python/helpers /opt/python/helpers
 COPY --chown=dependabot:dependabot terraform/helpers /opt/terraform/helpers
+COPY --chown=dependabot:dependabot lein/helpers /opt/lein/helpers
 
 ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt" \
   PATH="$PATH:/opt/terraform/bin:/opt/python/bin:/opt/go_modules/bin" \
@@ -241,6 +258,8 @@ ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt" \
 USER dependabot
 RUN mkdir -p /opt/bundler/v1 \
   && mkdir -p /opt/bundler/v2
+
+RUN bash /opt/lein/helpers/build /opt/lein
 RUN bash /opt/bundler/helpers/v1/build /opt/bundler/v1
 RUN bash /opt/bundler/helpers/v2/build /opt/bundler/v2
 RUN bash /opt/go_modules/helpers/build /opt/go_modules
