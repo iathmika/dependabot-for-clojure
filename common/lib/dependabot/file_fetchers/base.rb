@@ -75,7 +75,8 @@ module Dependabot
 
 
        #@commit ||= client_for_provider.fetch_commit(repo, branch)
-        @commit ||= "1573ef6361b257087932c542705fe3466d29f55d"
+        #@commit ||= "1573ef6361b257087932c542705fe3466d29f55d" garnish
+        @commit ||= "ae1b46bc9d7ca9f835507b12d1edb417ef05501d" #moby
         #@commit ||= "0d4f9b560899449f5029f619febf1ea95d69b51d"
         #@commit ||= "121858dcb63e129b98d3c78f42daacabdcf51eea"
 

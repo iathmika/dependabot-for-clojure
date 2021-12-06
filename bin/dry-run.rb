@@ -511,6 +511,7 @@ $files = if $repo_contents_path
            end
          end
 
+#puts "files: #{$files}"
 # Parse the dependency files
 puts "=> parsing dependency files"
 parser = Dependabot::FileParsers.for_package_manager($package_manager).new(
@@ -745,6 +746,8 @@ dependencies.each do |dep|
       puts "deleted #{updated_file.name}"
     else
       original_file = $files.find { |f| f.name == updated_file.name }
+      puts "original file: #{original_file}"
+      puts "updated file: #{updated_file}"
       if original_file
         show_diff(original_file, updated_file)
         
@@ -786,9 +789,13 @@ git add project.clj
     #      CMD
        #   )
        system("git commit -m '#{msg.commit_message}'")
-       fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
-       $files = fetcher.files
-    
+       #fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
+      # puts "updated files: #{updated_files} "
+       #$files = fetcher.files
+       $files.map!{ |x| x.name == "project.clj" ? updated_files.first : x}
+       #$files[1] = updated_files
+       
+      # puts "end files: #{$files}"
 #git commit -m \"#{msg.commit_message}\" 
  # end
   end
