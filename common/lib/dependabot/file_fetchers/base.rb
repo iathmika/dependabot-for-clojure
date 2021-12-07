@@ -70,17 +70,15 @@ module Dependabot
         #branch = target_branch || default_branch_for_repo
         branch = "master"
                
-        #commitid = `git show --pretty=%H`
-        #puts commit-d
+        response = ref(repo, "heads/#{branch}")
 
+        #raise Octokit::NotFound if response.is_a?(Array)
 
-       #@commit ||= client_for_provider.fetch_commit(repo, branch)
+       @commit =  response.object.sha
+        #@commit ||= client_for_provider.fetch_commit(repo, branch)
         #@commit ||= "1573ef6361b257087932c542705fe3466d29f55d" garnish
-        @commit ||= "ae1b46bc9d7ca9f835507b12d1edb417ef05501d" #moby
-        #@commit ||= "0d4f9b560899449f5029f619febf1ea95d69b51d"
-        #@commit ||= "121858dcb63e129b98d3c78f42daacabdcf51eea"
-
-        
+       # @commit ||= "ae1b46bc9d7ca9f835507b12d1edb417ef05501d" #moby
+      
       rescue *CLIENT_NOT_FOUND_ERRORS
         raise Dependabot::BranchNotFound, branch
       rescue Octokit::Conflict => e
@@ -571,6 +569,14 @@ module Dependabot
           Dependabot::Clients::CodeCommit.
           for_source(source: source, credentials: credentials)
       end
+
+      def gerrit_client
+        @gerit_client ||=
+          Dependabot::Clients::GerritWithRetries.for_source(
+            source: source, credentials: credentials)
+      end
+      
+            
     end
   end
 end
