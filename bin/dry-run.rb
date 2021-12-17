@@ -130,7 +130,6 @@ unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
   $options[:credentials] << {
     "type" => "git_source",
     "host" => "github.com",
-    #"username" => "x-access-token",
     "username" => "x-access-token",
     "password" => ENV["LOCAL_GITHUB_ACCESS_TOKEN"]
     #"password" => "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"
@@ -470,7 +469,10 @@ always_clone = Dependabot::Utils.
                always_clone_for_package_manager?($package_manager)
 
 #$repo_contents_path = File.expand_path(File.join("tmp", $repo_name.split("/"))) if $options[:clone] || always_clone
-     #  system("git checkout feature/dependabot")
+
+
+
+
 $repo_contents_path = "/home/dependabot/dependabot-core/tmp/athmika/#{$repo_name}"
 fetcher_args = {
   source: $source,
@@ -621,6 +623,11 @@ end
 
 puts "=> updating #{dependencies.count} dependencies: #{dependencies.map(&:name).join(', ')}"
 
+# checkout to feature branch so that all commits are made in this branch.
+Dir.chdir($repo_contents_path) do
+        system("git checkout -b feature/dependabot")
+end
+
 # rubocop:disable Metrics/BlockLength
 checker_count = 0
 dependencies.each do |dep|
@@ -727,6 +734,7 @@ dependencies.each do |dep|
   end
 
   if $options[:write]
+    
     updated_files.each do |updated_file|
      # path = File.join(dependency_files_cache_dir, updated_file.name)
       path = File.join("tmp/athmika/#{$repo_name}/", updated_file.name)
@@ -746,8 +754,8 @@ dependencies.each do |dep|
       puts "deleted #{updated_file.name}"
     else
       original_file = $files.find { |f| f.name == updated_file.name }
-      puts "original file: #{original_file}"
-      puts "updated file: #{updated_file}"
+    
+    
       if original_file
         show_diff(original_file, updated_file)
         
@@ -759,6 +767,7 @@ dependencies.each do |dep|
 
 
   if $options[:pull_request]
+    
     msg = Dependabot::PullRequestCreator::MessageBuilder.new(
       dependencies: updated_deps,
       files: updated_files,
@@ -768,7 +777,7 @@ dependencies.each do |dep|
       github_redirection_service: Dependabot::PullRequestCreator::DEFAULT_GITHUB_REDIRECTION_SERVICE
     ).message
     puts "Pull Request Title: #{msg.pr_name}"
-   # puts "--description--\n#{msg.pr_message}\n--/description--"
+  
     puts "--commit--\n#{msg.commit_message}\n--/commit--"
     
      Dir.chdir($repo_contents_path) do
@@ -777,26 +786,12 @@ dependencies.each do |dep|
             
        Dependabot::SharedHelpers.run_shell_command(
      <<~CMD
-
-git add project.clj 
-
+     git add project.clj 
          CMD
        )
-    #    Dependabot::SharedHelpers.run_shell_command(
-    # <<~CMD
-    #  git commit -m \"test message commit\"
-
-    #      CMD
-       #   )
        system("git commit -m '#{msg.commit_message}'")
-       #fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
-      # puts "updated files: #{updated_files} "
-       #$files = fetcher.files
+      # system("rfc feature/dependabot")
        $files.map!{ |x| x.name == "project.clj" ? updated_files.first : x}
-       #$files[1] = updated_files
-       
-      # puts "end files: #{$files}"
-#git commit -m \"#{msg.commit_message}\" 
  # end
   end
   end
@@ -804,15 +799,6 @@ git add project.clj
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end
-
-
-  # diff = Dependabot::SharedHelpers.run_shell_command(
-  #   <<~CMD
-  #    git log
-  #        CMD
-  # )
-  # puts "diff is #{diff}"
-
 
 #StackProf.stop if $options[:profile]
 #StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]

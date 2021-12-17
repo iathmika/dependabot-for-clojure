@@ -32,6 +32,7 @@ RUN apt-get update \
     openssh-client \
     software-properties-common \
     make \
+    less \
     libpq-dev \
     libssl-dev \
     libbz2-dev \
@@ -43,6 +44,7 @@ RUN apt-get update \
     libncurses5-dev \
     libncursesw5-dev \
     libmysqlclient-dev \
+    nano \
     xz-utils \
     tk-dev \
     libxml2-dev \
@@ -54,6 +56,8 @@ RUN apt-get update \
 
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+
+#COPY ~/.ssh /home/dependabot/.ssh
 
 RUN if ! getent group "$USER_GID"; then groupadd --gid "$USER_GID" dependabot ; \
      else GROUP_NAME=$(getent group $USER_GID | awk -F':' '{print $1}'); groupmod -n dependabot "$GROUP_NAME" ; fi \
