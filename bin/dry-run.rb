@@ -646,7 +646,8 @@ dependencies.each do |dep|
     else
       puts "    (can't update vulnerable dependencies for "\
            "projects without a lockfile as the currently "\
-           "installed version isn't known 🚨)"
+           "install
+ed version isn't known 🚨)"
     end
     next
   end
@@ -790,7 +791,7 @@ dependencies.each do |dep|
          CMD
        )
        system("git commit -m '#{msg.commit_message}'")
-      # system("rfc feature/dependabot")
+      
        $files.map!{ |x| x.name == "project.clj" ? updated_files.first : x}
  # end
   end
@@ -799,7 +800,9 @@ dependencies.each do |dep|
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end
-
+Dir.chdir($repo_contents_path) do
+  system("rfc feature/dependabot")
+end 
 #StackProf.stop if $options[:profile]
 #StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
 
