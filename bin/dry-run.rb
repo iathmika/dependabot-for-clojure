@@ -104,7 +104,7 @@ require "dependabot/lein"
 
 # GitHub credentials with write permission to the repo you want to update
 # (so that you can create a new branch, commit and pull request).
-# If using a private registry it's also possible to add details of that here.
+ # If using a private registry it's also possible to add details of that here.
 
 $options = {
   credentials: [],
@@ -132,8 +132,7 @@ unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
     "host" => "github.com",
     "username" => "x-access-token",
     "password" => ENV["LOCAL_GITHUB_ACCESS_TOKEN"]
-    #"password" => "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"
-  }
+    }
 end
 
 unless ENV["LOCAL_CONFIG_VARIABLES"].to_s.strip.empty?
@@ -457,38 +456,30 @@ StackProf.start(raw: true) if $options[:profile]
 $source = Dependabot::Source.new(
   provider: $options[:provider],
   repo: $repo_name,
-  
   directory: $options[:directory],
-  
   branch: $options[:branch],
-  
   commit: $options[:commit]
 )
 
-always_clone = Dependabot::Utils.
-               always_clone_for_package_manager?($package_manager)
+#initialise repository path
+$repo_contents_path = (File.join("tmp", $repo_name.split("/")))
 
-#$repo_contents_path = File.expand_path(File.join("tmp", $repo_name.split("/"))) if $options[:clone] || always_clone
-
-
-
-
-$repo_contents_path = "/home/dependabot/dependabot-core/tmp/athmika/#{$repo_name}"
 fetcher_args = {
   source: $source,
   credentials: $options[:credentials],
   repo_contents_path: $repo_contents_path
 }
+
 $config_file = begin
-  cfg_file = Dependabot::Config::FileFetcher.new(**fetcher_args).config_file
-  Dependabot::Config::File.parse(cfg_file.content)
+ cfg_file = Dependabot::Config::FileFetcher.new(**fetcher_args).config_file
+ Dependabot::Config::File.parse(cfg_file.content)
 rescue Dependabot::DependencyFileNotFound
-  Dependabot::Config::File.new(updates: [])
+ Dependabot::Config::File.new(updates: [])
 end
 $update_config = $config_file.update_config(
-  $package_manager,
-  directory: $options[:directory],
-  target_branch: $options[:branch]
+ $package_manager,
+ directory: $options[:directory],
+ target_branch: $options[:branch]
 )
 
 fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
@@ -497,9 +488,9 @@ $files = if $repo_contents_path
              puts "=> reading cloned repo from #{$repo_contents_path}"
            else
              puts "=> cloning into #{$repo_contents_path}"
-            # FileUtils.rm_rf($repo_contents_path)
+             FileUtils.rm_rf($repo_contents_path)
            end
-           #fetcher.clone_repo_contents
+           fetcher.clone_repo_contents
            if $options[:commit]
              Dir.chdir($repo_contents_path) do
                puts "=> checking out commit #{$options[:commit]}"
@@ -513,7 +504,6 @@ $files = if $repo_contents_path
            end
          end
 
-#puts "files: #{$files}"
 # Parse the dependency files
 puts "=> parsing dependency files"
 parser = Dependabot::FileParsers.for_package_manager($package_manager).new(
@@ -737,8 +727,8 @@ ed version isn't known 🚨)"
   if $options[:write]
     
     updated_files.each do |updated_file|
-     # path = File.join(dependency_files_cache_dir, updated_file.name)
-      path = File.join("tmp/athmika/#{$repo_name}/", updated_file.name)
+      #path = File.join(dependency_files_cache_dir, updated_file.name)
+      path = File.join($repo_contents_path, updated_file.name)
       puts " => writing updated file ./#{path}"
       dirname = File.dirname(path)
       FileUtils.mkdir_p(dirname) unless Dir.exist?(dirname)
@@ -755,11 +745,8 @@ ed version isn't known 🚨)"
       puts "deleted #{updated_file.name}"
     else
       original_file = $files.find { |f| f.name == updated_file.name }
-    
-    
       if original_file
         show_diff(original_file, updated_file)
-        
       else
         puts "added #{updated_file.name}"
       end
@@ -768,7 +755,6 @@ ed version isn't known 🚨)"
 
 
   if $options[:pull_request]
-    
     msg = Dependabot::PullRequestCreator::MessageBuilder.new(
       dependencies: updated_deps,
       files: updated_files,
@@ -777,35 +763,30 @@ ed version isn't known 🚨)"
       commit_message_options: $update_config.commit_message_options.to_h,
       github_redirection_service: Dependabot::PullRequestCreator::DEFAULT_GITHUB_REDIRECTION_SERVICE
     ).message
-    puts "Pull Request Title: #{msg.pr_name}"
-  
     puts "--commit--\n#{msg.commit_message}\n--/commit--"
-    
      Dir.chdir($repo_contents_path) do
-             #  puts "=> checking out commit #{$options[:commit]}"
-              # Dependabot::SharedHelpers.run_shell_command("git checkout #{$options[:commit]}")
-            
        Dependabot::SharedHelpers.run_shell_command(
-     <<~CMD
-     git add project.clj 
-         CMD
+         <<~CMD
+         git add project.clj
+             CMD
        )
        system("git commit -m '#{msg.commit_message}'")
-      
        $files.map!{ |x| x.name == "project.clj" ? updated_files.first : x}
- # end
+     end
+
+     #push the commits to gerrit via rfc
+     Dir.chdir($repo_contents_path) do
+       system("rfc feature/dependabot")
+     end
   end
-  end
- 
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end
-Dir.chdir($repo_contents_path) do
-  system("rfc feature/dependabot")
-end 
+
+
+
 #StackProf.stop if $options[:profile]
 #StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
 
 # rubocop:enable Metrics/BlockLength
-
 # rubocop:enable Style/GlobalVars
