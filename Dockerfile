@@ -45,25 +45,26 @@ RUN apt-get update \
     libncursesw5-dev \
     libmysqlclient-dev \
     nano \
+    sshpass \
+    expect \
     xz-utils \
     tk-dev \
     libxml2-dev \
     libxmlsec1-dev \
     libgeos-dev \
     python3-enchant \
+  && apt-get install -y openssh-client \
   && locale-gen en_US.UTF-8 \
   && rm -rf /var/lib/apt/lists/*
 
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-#COPY ~/.ssh /home/dependabot/.ssh
 
 RUN if ! getent group "$USER_GID"; then groupadd --gid "$USER_GID" dependabot ; \
      else GROUP_NAME=$(getent group $USER_GID | awk -F':' '{print $1}'); groupmod -n dependabot "$GROUP_NAME" ; fi \
   && useradd --uid "${USER_UID}" --gid "${USER_GID}" -m dependabot \
   && mkdir -p /opt && chown dependabot:dependabot /opt
-
 
 ### RUBY
 
@@ -111,7 +112,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
 
 ### ELM
 
-# Install Elm 0.19
+#Install Elm 0.19
 ENV PATH="$PATH:/node_modules/.bin"
 RUN curl -sSLfO "https://github.com/elm/compiler/releases/download/0.19.0/binaries-for-linux.tar.gz" \
   && tar xzf binaries-for-linux.tar.gz \
@@ -168,9 +169,9 @@ RUN mkdir /tmp/composer-cache \
 USER root
 
 
-### GO
+#GO
 
-# Install Go
+##Install Go
 ARG GOLANG_VERSION=1.17.1
 ARG GOLANG_CHECKSUM=dab7d9c34361dc21ec237d584590d72500652e7c909bf082758fb63064fca0ef
 ENV PATH=/opt/go/bin:$PATH
@@ -181,9 +182,9 @@ RUN cd /tmp \
   && rm go.tar.gz
 
 
-### ELIXIR
+#ELIXIR
 
-# Install Erlang, Elixir and Hex
+##Install Erlang, Elixir and Hex
 ENV PATH="$PATH:/usr/local/elixir/bin"
 # https://github.com/elixir-lang/elixir/releases
 ARG ELIXIR_VERSION=v1.12.2
@@ -204,9 +205,9 @@ RUN curl -sSLfO https://packages.erlang-solutions.com/erlang-solutions_1.0_all.d
   && rm -rf /var/lib/apt/lists/*
 
 
-### RUST
+#RUST
 
-# Install Rust 1.51.0
+#Install Rust 1.51.0
 ENV RUSTUP_HOME=/opt/rust \
   CARGO_HOME=/opt/rust \
   PATH="${PATH}:/opt/rust/bin"
@@ -232,7 +233,7 @@ ENV PATH="$PATH:/usr/local/lein/bin" \
   LEIN_SNAPSHOTS_IN_RELEASE="yes"
 
 
-### Terraform
+###Terraform
 
 USER root
 ARG TERRAFORM_VERSION=1.0.6
@@ -254,6 +255,7 @@ COPY --chown=dependabot:dependabot npm_and_yarn/helpers /opt/npm_and_yarn/helper
 COPY --chown=dependabot:dependabot python/helpers /opt/python/helpers
 COPY --chown=dependabot:dependabot terraform/helpers /opt/terraform/helpers
 COPY --chown=dependabot:dependabot lein/helpers /opt/lein/helpers
+COPY --chown=dependabot:dependabot ssh /home/dependabot/.ssh
 
 ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt" \
   PATH="$PATH:/opt/terraform/bin:/opt/python/bin:/opt/go_modules/bin" \
@@ -274,6 +276,9 @@ RUN bash /opt/terraform/helpers/build /opt/terraform
 RUN bash /opt/composer/helpers/v1/build /opt/composer/v1
 RUN bash /opt/composer/helpers/v2/build /opt/composer/v2
 
+RUN chown -R dependabot:dependabot /home/dependabot/.ssh
+RUN echo "Host remotehost\n\tStrictHostKeyChecking no\n" >> /home/dependabot/.ssh/config
 ENV HOME="/home/dependabot"
 
 WORKDIR ${HOME}
+CMD ["/bin/bash"]
