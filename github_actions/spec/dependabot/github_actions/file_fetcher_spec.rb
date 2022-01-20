@@ -24,9 +24,9 @@ RSpec.describe Dependabot::GithubActions::FileFetcher do
     [{
       "type" => "git_source",
       "host" => "github.com",
-      "username" => "iathmika",
-      "password" => "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"
-    }]
+      "username" => "x-access-token",
+      "password" => "token"
+       }]
   end
 
   before { allow(file_fetcher_instance).to receive(:commit).and_return("sha") }
@@ -91,7 +91,7 @@ RSpec.describe Dependabot::GithubActions::FileFetcher do
         stub_request(
           :get,
           File.join(url, ".github/workflows/sherlock-workflow.yaml?ref=sha")
-        ).with(headers: { "Authorization" => "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"}).
+        ).with(headers: { "Authorization" => "token token" }).
           to_return(
             status: 200,
             body: bad_workflow_file_fixture,
@@ -110,7 +110,7 @@ RSpec.describe Dependabot::GithubActions::FileFetcher do
   context "with an empty workflow directory" do
     before do
       stub_request(:get, url + ".github/workflows?ref=sha").
-        with(headers: { "Authorization" => "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" }).
+        with(headers: { "Authorization" => "token token" }).
         to_return(
           status: 200,
           body: "[]",
