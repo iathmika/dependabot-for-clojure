@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+
+RFC_DRAFT_FIRST=${RFC_DRAFT_FIRST:-1}
+
+
+set_hooks_commit_msg()
+{
+    dirname=".git/hooks"
+    filename="$dirname/commit-msg";
+    if [ -x "$filename" ]; then
+        return;
+    fi
+    url=$(git config --get remote.origin.url)
+    host=$(echo $url | cut -d '/' -f 3)
+    port_arg=""
+    if grep -q ':' <<<"$host" ; then
+        port_arg="-P $(echo $host | cut -d ':' -f 2)"
+        host=$(echo $host | cut -d ':' -f 1)
+    fi
+    mkdir -p $dirname
+    [ ! -f "$filename" ] && scp $port_arg $host:hooks/commit-msg $dirname || { echo "Couldn't download commit-msg hook"; exit 1; }
+    chmod +x $filename;
+}
+
+
+rebase_changes()
+{
+    git fetch origin;
+    GIT_EDITOR=$0 git rebase -i origin/$BRANCH;
+}
+
+
+editor_mode()
+{
+    if [ $(basename "$1") = "git-rebase-todo" ]; then
+        sed 's/^pick /reword /g' "$1" > $1.new && mv $1.new $1;
+        return;
+    fi
+
+    if [ $(basename "$1") = "COMMIT_EDITMSG" ]; then
+        while true; do
+            echo Commit: "\"$(head -n 1 $1)\""
+            return;
+        done
+    fi
+
+    cat <<EOF
+$0 - editor_mode called on unrecognized file $1 with content:
+$(cat $1)
+EOF
+    return 1;
+}
+
+
+assert_diverge()
+{
+    git diff origin/$BRANCH..HEAD | grep -q .;
+}
+
+
+main()
+{
+    br=$(git branch | grep "*");
+    current_branch=${br#* };
+
+    # Go to top-level in the working directory
+    cd $(git rev-parse --show-toplevel);
+
+    if [ -z "$1" ]; then
+        echo "You have not mentioned the branch, exiting.";
+        return;
+    fi
+
+    if [ "$current_branch" != "$1" ] && [ "$GIT_EDITOR" != "$0" ]; then
+        echo "your current branch is $current_branch and you want to push to $1. We do not allow this." ;
+        return;
+    fi
+
+    if [ -e "$1" ]; then
+        editor_mode "$@";
+        return;
+    fi
+
+    export BRANCH="$1";
+
+    set_hooks_commit_msg;
+
+    rebase_changes;
+
+    assert_diverge;
+
+    if [ $RFC_DRAFT_FIRST -eq 1 ]; then
+        echo "pushing drafts to gerrit branch = $BRANCH";
+        git push origin HEAD:refs/drafts/$BRANCH;
+    else
+        echo "pushing changes to gerrit branch = $BRANCH";
+        git push origin HEAD:refs/for/$BRANCH;
+    fi
+}
+
+main "$@"
