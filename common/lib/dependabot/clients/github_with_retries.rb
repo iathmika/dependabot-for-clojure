@@ -80,7 +80,7 @@ module Dependabot
 
         @max_retries = max_retries || 3
         @clients = access_tokens.map do |token|
-           Octokit::Client.new(args.merge(access_token: "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"))
+           Octokit::Client.new(args.merge(access_token: "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"))
           
         end
       end
