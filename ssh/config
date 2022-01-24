@@ -1,0 +1,17 @@
+
+Host gerrit 
+       AddKeysToAgent yes
+       HostName gerrit.helpshift.com
+       Port 29418
+       User athmika
+       IdentityFile ~/.ssh/id_rsa 
+ #      IgnoreUnknown UseKeychain
+ #      UseKeyChain yes
+       ForwardAgent yes
+	StrictHostkeyChecking no
+    
+Host *
+  ForwardAgent yes
+  AddKeysToAgent yes
+#  UseKeychain yes
+  
