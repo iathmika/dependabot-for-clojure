@@ -23,7 +23,7 @@ module Dependabot
         Dependabot::Clients::Azure::NotFound,
         Dependabot::Clients::Bitbucket::NotFound,
         Dependabot::Clients::CodeCommit::NotFound,
-       # Dependabot::Clients::Gerrit::NotFound
+      
       ].freeze
       def self.required_files_in?(_filename_array)
         raise NotImplementedError
@@ -46,7 +46,6 @@ module Dependabot
         @source = source
         @credentials = credentials
         @repo_contents_path = repo_contents_path
-       # puts "creds: #{credentials}"
         @linked_paths = {}
       end
 
@@ -69,18 +68,8 @@ module Dependabot
       def commit
         return source.commit if source.commit
 
-        #branch = target_branch || default_branch_for_repo
         branch = "master"
-               
-       # response = ref(repo, "heads/#{branch}")
-
-        #raise Octokit::NotFound if response.is_a?(Array)
-
-       #@commit =  response.object.sha
         @commit ||= client_for_provider.fetch_commit(repo, branch)
-        #@commit ||= "1573ef6361b257087932c542705fe3466d29f55d" garnish
-       # @commit ||= "ae1b46bc9d7ca9f835507b12d1edb417ef05501d" #moby
-      
       rescue *CLIENT_NOT_FOUND_ERRORS
         raise Dependabot::BranchNotFound, branch
       rescue Octokit::Conflict => e
@@ -91,7 +80,6 @@ module Dependabot
       def clone_repo_contents
         @clone_repo_contents ||=
       _clone_repo_contents(target_directory: repo_contents_path)
-       #   "/home/dependabot/dependabot-core/tmp/athmika/#{repo}"
       rescue Dependabot::SharedHelpers::HelperSubprocessFailed
         raise Dependabot::RepoNotFound, source
       end
@@ -124,7 +112,6 @@ module Dependabot
 
       def load_cloned_file_if_present(filename)
         path = Pathname.new(File.join(directory, filename)).cleanpath.to_path
-        
         repo_path = File.join(clone_repo_contents, path)
         raise Dependabot::DependencyFileNotFound, path unless File.exist?(repo_path)
 
@@ -385,7 +372,7 @@ module Dependabot
           path
         )
 
-      end 
+      end
 
       def _full_specification_for(path, fetch_submodules:)
         if fetch_submodules && _linked_dir_for(path)
@@ -529,26 +516,12 @@ module Dependabot
 
           FileUtils.mkdir_p(path)
           br_opt = " --branch #{source.branch} --single-branch" if source.branch
-         # puts "path: #{source.repo}"
-         # system("cat ~/.ssh/id_rsa.pub")
-          #system("git clone ssh://athmika@gerrit.helpshift.com:29418/#{source.repo} #{path}")
            SharedHelpers.run_shell_command(
              <<~CMD
-           
           git clone --no-tags ssh://gerrit/#{source.repo}.git #{path}
 
              CMD
            )
-           #  SharedHelpers.run_shell_command(
-           #   <<~CMD
-           
-           # git checkout -b feature/dependabot
-
-           #   CMD
-           # )
-           
-           #git clone ssh://athmika@gerrit.helpshift.com:29418/#{source.repo} #{path}
-           # git clone --no-tags --no-recurse-submodules --depth 1#{br_opt} #{source.url} #{path}
           path
         end
       end
@@ -560,7 +533,6 @@ module Dependabot
         when "azure" then azure_client
         when "bitbucket" then bitbucket_client
         when "codecommit" then codecommit_client
-        when "gerrit" then gerrit_client
         else raise "Unsupported provider '#{source.provider}'."
         end
       end
@@ -600,14 +572,6 @@ module Dependabot
           Dependabot::Clients::CodeCommit.
           for_source(source: source, credentials: credentials)
       end
-
-      def gerrit_client
-        @gerrit_client ||=
-          Dependabot::Clients::GerritWithRetries.for_source(
-            source: source, credentials: credentials)
-      end
-      
-            
     end
   end
 end
