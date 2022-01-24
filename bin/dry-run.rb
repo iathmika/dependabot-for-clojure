@@ -104,7 +104,7 @@ require "dependabot/lein"
 
 # GitHub credentials with write permission to the repo you want to update
 # (so that you can create a new branch, commit and pull request).
- # If using a private registry it's also possible to add details of that here.
+# If using a private registry it's also possible to add details of that here.
 
 $options = {
   credentials: [],
@@ -236,7 +236,6 @@ end
 
 option_parse.parse!
 
-# Full name of the GitHub repo you want to create pull requests for
 if ARGV.length < 2
   puts option_parse.help
   exit 1
@@ -773,17 +772,17 @@ ed version isn't known 🚨)"
        system("git commit -m '#{msg.commit_message}'")
        $files.map!{ |x| x.name == "project.clj" ? updated_files.first : x}
      end
-
-     #push the commits to gerrit via rfc
-     Dir.chdir($repo_contents_path) do
-       system("rfc feature/dependabot")
-     end
   end
+
 rescue StandardError => e
   handle_dependabot_error(error: e, dependency: dep)
 end
 
-
+puts "running rfc"
+#push the commits to gerrit via rfc
+Dir.chdir($repo_contents_path) do
+ # system("/home/dependabot/rfc feature/dependabot")
+end
 
 #StackProf.stop if $options[:profile]
 #StackProf.results("tmp/stackprof-#{Time.now.strftime('%Y-%m-%d-%H:%M')}.dump") if $options[:profile]
