@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-RFC_DRAFT_FIRST=${RFC_DRAFT_FIRST:-1}
+RFC_DRAFT_FIRST=${RFC_DRAFT_FIRST:-0}
 
 
 set_hooks_commit_msg()
