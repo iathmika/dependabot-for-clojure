@@ -120,6 +120,7 @@ module Dependabot
       when "gitlab" then "gitlab.com"
       when "azure" then "dev.azure.com"
       when "codecommit" then "us-east-1"
+      when "gerrit" then "gerrit.helpshift.com"
       else raise "Unexpected provider '#{provider}'"
       end
     end
@@ -131,6 +132,7 @@ module Dependabot
       when "gitlab" then "https://gitlab.com/api/v4"
       when "azure" then "https://dev.azure.com/"
       when "codecommit" then nil
+      when "gerrit" then "https://gerrit.helpshift.com"
       else raise "Unexpected provider '#{provider}'"
       end
     end
