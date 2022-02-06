@@ -37,6 +37,10 @@
 
 # rubocop:disable Style/GlobalVars
 
+#TODO
+# Do not change the default values directly, write functions to make changes.
+# Check config file structure
+
 require "etc"
 unless Etc.getpwuid(Process.uid).name == "dependabot"
   puts <<~INFO
@@ -126,6 +130,7 @@ $options = {
   pull_request: true
 }
 
+
 unless ENV["LOCAL_GITHUB_ACCESS_TOKEN"].to_s.strip.empty?
   $options[:credentials] << {
     "type" => "git_source",
@@ -161,7 +166,7 @@ end
 option_parse = OptionParser.new do |opts|
   opts.banner = "usage: ruby bin/dry-run.rb [OPTIONS] PACKAGE_MANAGER REPO"
 
-  opts.on("--provider PROVIDER", "SCM provider e.g. github, azure, bitbucket") do |value|
+  opts.on("--provider PROVIDER", "SCM provider e.g. github, gerrit, azure, bitbucket") do |value|
     $options[:provider] = value
   end
 
@@ -242,6 +247,7 @@ if ARGV.length < 2
 end
 
 $package_manager, $repo_name = ARGV
+
 
 def show_diff(original_file, updated_file)
   return unless original_file
@@ -469,17 +475,19 @@ fetcher_args = {
   repo_contents_path: $repo_contents_path
 }
 
-$config_file = begin
- cfg_file = Dependabot::Config::FileFetcher.new(**fetcher_args).config_file
- Dependabot::Config::File.parse(cfg_file.content)
-rescue Dependabot::DependencyFileNotFound
- Dependabot::Config::File.new(updates: [])
-end
-$update_config = $config_file.update_config(
- $package_manager,
- directory: $options[:directory],
- target_branch: $options[:branch]
-)
+
+
+# $config_file = begin
+#  cfg_file = Dependabot::Config::FileFetcher.new(**fetcher_args).config_file
+#  Dependabot::Config::File.parse(cfg_file.content)
+# rescue Dependabot::DependencyFileNotFound
+#  Dependabot::Config::File.new(updates: [])
+# end
+# $update_config = $config_file.update_config(
+#  $package_manager,
+#  directory: $options[:directory],
+#  target_branch: $options[:branch]
+# )
 
 fetcher = Dependabot::FileFetchers.for_package_manager($package_manager).new(**fetcher_args)
 $files = if $repo_contents_path
@@ -502,6 +510,37 @@ $files = if $repo_contents_path
              fetcher.files
            end
          end
+
+
+
+# checkout to feature branch so that all commits are made in this branch.
+Dir.chdir($repo_contents_path) do
+ 
+
+  system("git checkout -b feature/dependabot")
+  system("git merge --no-ff --no-commit origin/master")
+  system("mkdir .github")
+  #  system("git commit -m  ")
+  
+end
+
+Dir.chdir("tmp/aadhar/.github") do
+  system("cp ../../dependabot.yml . ")
+end
+
+
+$config_file = begin
+ cfg_file = Dependabot::Config::FileFetcher.new(**fetcher_args).config_file
+ Dependabot::Config::File.parse(cfg_file.content)
+rescue Dependabot::DependencyFileNotFound
+ Dependabot::Config::File.new(updates: [])
+end
+$update_config = $config_file.update_config(
+ $package_manager,
+ directory: $options[:directory],
+ target_branch: $options[:branch]
+)
+puts("config file: #{cfg_file.content}")
 
 # Parse the dependency files
 puts "=> parsing dependency files"
@@ -612,10 +651,8 @@ end
 
 puts "=> updating #{dependencies.count} dependencies: #{dependencies.map(&:name).join(', ')}"
 
-# checkout to feature branch so that all commits are made in this branch.
-Dir.chdir($repo_contents_path) do
-        system("git checkout -b feature/dependabot")
-end
+
+#TODO do git reset --hard (merge master into this branch first)
 
 # rubocop:disable Metrics/BlockLength
 checker_count = 0
@@ -635,8 +672,7 @@ dependencies.each do |dep|
     else
       puts "    (can't update vulnerable dependencies for "\
            "projects without a lockfile as the currently "\
-           "install
-ed version isn't known 🚨)"
+           "installed version isn't known 🚨)"
     end
     next
   end
@@ -781,7 +817,8 @@ end
 puts "running rfc"
 #push the commits to gerrit via rfc
 Dir.chdir($repo_contents_path) do
- # system("/home/dependabot/rfc feature/dependabot")
+  #system("/home/dependabot/rfc feature/dependabot")
+ #   system("git push origin HEAD:refs/for/feature/dependabot")
 end
 
 #StackProf.stop if $options[:profile]
@@ -789,3 +826,5 @@ end
 
 # rubocop:enable Metrics/BlockLength
 # rubocop:enable Style/GlobalVars
+
+
