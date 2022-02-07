@@ -524,9 +524,9 @@ Dir.chdir($repo_contents_path) do
   
 end
 
-Dir.chdir("tmp/aadhar/.github") do
-  system("cp ../../dependabot.yml . ")
-end
+# Dir.chdir("tmp/aadhar/.github") do
+#   system("cp ../../dependabot.yml . ")
+# end
 
 
 $config_file = begin
@@ -540,7 +540,7 @@ $update_config = $config_file.update_config(
  directory: $options[:directory],
  target_branch: $options[:branch]
 )
-puts("config file: #{cfg_file.content}")
+#puts("config file: #{cfg_file.content}")
 
 # Parse the dependency files
 puts "=> parsing dependency files"
@@ -818,7 +818,7 @@ puts "running rfc"
 #push the commits to gerrit via rfc
 Dir.chdir($repo_contents_path) do
   #system("/home/dependabot/rfc feature/dependabot")
- #   system("git push origin HEAD:refs/for/feature/dependabot")
+ # system("git push origin HEAD:refs/for/feature/dependabot")
 end
 
 #StackProf.stop if $options[:profile]
