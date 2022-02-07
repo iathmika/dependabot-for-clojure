@@ -235,7 +235,8 @@ docker run -dit --rm \
 docker exec -e PACKAGE_NAME=$PACKAGE_NAME -e REPO_NAME=$REPO_NAME ${CONTAINER_NAME} bash -c 'eval $(ssh-agent);
 chmod 400 ~/.ssh/id_rsa ;
 #chmod +rwx /home/dependabot/rfc;
-sshpass -P passphrase -p $SSH_PASSPHRASE ssh-add /home/dependabot/.ssh/id_rsa; 
+#sshpass -P passphrase -p $SSH_PASSPHRASE 
+ssh-add /home/dependabot/.ssh/id_rsa; 
 bin/dry-run.rb --provider gerrit $PACKAGE_NAME $REPO_NAME'
 
 #echo "Running dependabot for $1"
