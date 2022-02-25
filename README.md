@@ -1,6 +1,11 @@
 <p align="center">
   <img src="https://s3.eu-west-2.amazonaws.com/dependabot-images/logo-with-name-horizontal.svg?v5" alt="Dependabot" width="336">
 </p>
+This is a fork of Dependabot-core repository.
+This repository serves the following purposes in addition to the features of dependabot-core -
+
+1. It provides leiningen support to dependot for finding out outdated dependencies in clojure projects.
+2. It provides Gerrit client support for pushing bump commits to gerrit and cloning repositories from Gerrit.
 
 # Dependabot
 
