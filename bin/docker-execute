@@ -225,7 +225,7 @@ docker run -dit --rm \
   -v "$(pwd)/rfc:/home/dependabot/rfc" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
-  -e SSH_PASSPHRASE=$SSH_PASSPHRASE_DEPENDABOT \
+  -e SSH_PASSPHRASE=$SSH_PASSPHRASE \
   --env "LOCAL_GITHUB_ACCESS_TOKEN=$LOCAL_GITHUB_ACCESS_TOKEN" \
   "${DOCKER_OPTS[@]}" \
   --cap-add=SYS_PTRACE \
@@ -237,7 +237,7 @@ chmod 400 ~/.ssh/id_rsa ;
 #chmod +rwx /home/dependabot/rfc;
 sshpass -P passphrase -p $SSH_PASSPHRASE ssh-add /home/dependabot/.ssh/id_rsa;
 
-for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:aadhar branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
+for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 athmika@gerrit.helpshift.com gerrit review $c --abandon; \
 done;
