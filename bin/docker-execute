@@ -52,16 +52,16 @@ build_image() {
   docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t "$IMAGE_NAME" -f "$DOCKERFILE" .
 }
 
-IMAGE_ID=$(docker inspect --type=image -f '{{.Id}}' "$IMAGE_NAME" 2> /dev/null || true)
-if [ -z "$IMAGE_ID" ]; then
-  echo "$(tput setaf 4) > image $IMAGE_NAME doesn't exist$(tput sgr0)"
-  build_image
-elif [ "$REBUILD" = "true" ]; then
-  echo "$(tput setaf 4) > rebuild of $IMAGE_NAME requested$(tput sgr0)"
-  build_image
-else
-  echo "$(tput setaf 4) > image $IMAGE_NAME already exists$(tput sgr0)"
-fi
+# IMAGE_ID=$(docker inspect --type=image -f '{{.Id}}' "$IMAGE_NAME" 2> /dev/null || true)
+# if [ -z "$IMAGE_ID" ]; then
+#   echo "$(tput setaf 4) > image $IMAGE_NAME doesn't exist$(tput sgr0)"
+#   build_image
+# elif [ "$REBUILD" = "true" ]; then
+#   echo "$(tput setaf 4) > rebuild of $IMAGE_NAME requested$(tput sgr0)"
+#   build_image
+# else
+#   echo "$(tput setaf 4) > image $IMAGE_NAME already exists$(tput sgr0)"
+# fi
 
 set +e
 RUNNING=$(docker ps --format '{{.Names}}' | grep "$CONTAINER_NAME")
