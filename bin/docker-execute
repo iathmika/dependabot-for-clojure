@@ -14,6 +14,7 @@ HELP=false
 REBUILD=false
 
 echo "package: $2"
+echo "Image: $IMAGE_NAME"
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
 
@@ -221,8 +222,6 @@ docker run -dit --rm \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:/$CODE_DIR/tmp" \
   -v "$(pwd)/ssh:/home/dependabot/.ssh" \
-  -v "$(dirname $SSH_AUTH_SOCK)" \
-  -v "$(pwd)/rfc:/home/dependabot/rfc" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
   --env "LOCAL_GITHUB_ACCESS_TOKEN=$LOCAL_GITHUB_ACCESS_TOKEN" \
