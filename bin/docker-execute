@@ -234,9 +234,6 @@ docker run -dit \
 
 #docker exec ${CONTAINER_NAME} bash -c 'echo $SSH_AUTH_SOCK'
 docker exec ${CONTAINER_NAME} bash -c 'eval $(ssh-agent);
-chmod 400 ~/.ssh/id_rsa ;
-#chmod +rwx /home/dependabot/rfc;
-sshpass -P passphrase -p athmika ssh-add /home/dependabot/.ssh/id_rsa;
 for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 athmika@gerrit.helpshift.com gerrit review $c --abandon; \
