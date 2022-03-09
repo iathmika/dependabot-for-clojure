@@ -102,7 +102,7 @@ CODE_DIR="/home/dependabot/dependabot-core"
 #HOME="/Users/athmika"
 
 touch .core-bash_history
-docker run -dit --rm \
+docker run -dit \
   -v "$(pwd)/.core-bash_history:/home/dependabot/.bash_history" \
   -v "$(pwd)/.rubocop.yml:$CODE_DIR/.rubocop.yml" \
   -v "$(pwd)/bin:$CODE_DIR/bin" \
