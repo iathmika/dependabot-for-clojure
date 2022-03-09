@@ -224,13 +224,15 @@ docker run -dit \
   -v "$(pwd)/ssh:/home/dependabot/.ssh" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
+  -e PACKAGE_NAME=$PACKAGE_NAME \
+  -e REPO_NAME=$REPO_NAME \
   --env "LOCAL_GITHUB_ACCESS_TOKEN=$LOCAL_GITHUB_ACCESS_TOKEN" \
   "${DOCKER_OPTS[@]}" \
   --cap-add=SYS_PTRACE \
   "$IMAGE_NAME" "${CONTAINER_ARGS[@]}"
 
 #docker exec ${CONTAINER_NAME} bash -c 'echo $SSH_AUTH_SOCK'
-docker exec -e PACKAGE_NAME=$PACKAGE_NAME -e REPO_NAME=$REPO_NAME ${CONTAINER_NAME} bash -c 'eval $(ssh-agent);
+docker exec ${CONTAINER_NAME} bash -c 'eval $(ssh-agent);
 chmod 400 ~/.ssh/id_rsa ;
 #chmod +rwx /home/dependabot/rfc;
 ssh-add /home/dependabot/.ssh/id_rsa;
