@@ -53,16 +53,16 @@ build_image() {
   docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t "$IMAGE_NAME" -f "$DOCKERFILE" .
 }
 
-# IMAGE_ID=$(docker inspect --type=image -f '{{.Id}}' "$IMAGE_NAME" 2> /dev/null || true)
-# if [ -z "$IMAGE_ID" ]; then
-#   echo "$(tput setaf 4) > image $IMAGE_NAME doesn't exist$(tput sgr0)"
-#   build_image
-# elif [ "$REBUILD" = "true" ]; then
-#   echo "$(tput setaf 4) > rebuild of $IMAGE_NAME requested$(tput sgr0)"
-#   build_image
-# else
-#   echo "$(tput setaf 4) > image $IMAGE_NAME already exists$(tput sgr0)"
-# fi
+IMAGE_ID=$(docker inspect --type=image -f '{{.Id}}' "$IMAGE_NAME" 2> /dev/null || true)
+if [ -z "$IMAGE_ID" ]; then
+  echo "$(tput setaf 4) > image $IMAGE_NAME doesn't exist$(tput sgr0)"
+  build_image
+elif [ "$REBUILD" = "true" ]; then
+  echo "$(tput setaf 4) > rebuild of $IMAGE_NAME requested$(tput sgr0)"
+  build_image
+else
+  echo "$(tput setaf 4) > image $IMAGE_NAME already exists$(tput sgr0)"
+fi
 
 set +e
 RUNNING=$(docker ps --format '{{.Names}}' | grep "$CONTAINER_NAME")
@@ -240,11 +240,11 @@ whoami;
 chmod 777 /home/dependabot/dependabot-core;
 eval $(ssh-agent);
 ssh-add;
-echo ${SSH_KEY} ;
-for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
+for c in $(sshpass -p 29418 jenkinsgerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
- do ssh -p 29418 athmika@gerrit.helpshift.com gerrit review $c --abandon; \
+ do ssh -p 29418 jenkins@gerrit.helpshift.com gerrit review $c --abandon; \
 done;
+
 bin/dry-run.rb --provider gerrit $PACKAGE_NAME $REPO_NAME'
 
 #echo "Running dependabot for $1"
