@@ -515,13 +515,13 @@ $files = if $repo_contents_path
 
 # checkout to feature branch so that all commits are made in this branch.
 Dir.chdir($repo_contents_path) do
- 
+
 
   system("git checkout -b feature/dependabot")
   system("git merge --no-ff --no-commit origin/master")
   system("mkdir .github")
   #  system("git commit -m  ")
-  
+
 end
 
 # Dir.chdir("tmp/aadhar/.github") do
