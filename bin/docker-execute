@@ -239,6 +239,7 @@ ls -ald /home/dependabot/dependabot-core;
 whoami;
 chmod 777 /home/dependabot/dependabot-core;
 eval $(ssh-agent);
+echo ${SSH_KEY} ;
 for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 athmika@gerrit.helpshift.com gerrit review $c --abandon; \
