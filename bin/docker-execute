@@ -221,6 +221,7 @@ docker run -dit \
   -v "$(pwd)/omnibus/spec:$CODE_DIR/omnibus/spec" \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:/$CODE_DIR/tmp" \
+  -v "${HOME}/.ssh:/home/dependabot/.ssh" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
   -e PACKAGE_NAME=$PACKAGE_NAME \
@@ -240,7 +241,7 @@ whoami;
 chmod 777 /home/dependabot/dependabot-core;
 eval $(ssh-agent);
 ssh-add;
-for c in $(ssh -p 29418 -noKeyAuth athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
+for c in $(ssh -p 29418 athmika@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 athmika@gerrit.helpshift.com gerrit review $c --abandon; \
 done;
