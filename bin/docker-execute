@@ -238,6 +238,7 @@ docker run -dit \
 docker exec ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
 ls -ald /home/dependabot/dependabot-core;
 whoami;
+usermod -aG root dependabot;
 chmod 777 /home/dependabot/dependabot-core;
 chmod 777 /home/dependabot/.ssh;
 eval $(ssh-agent);
