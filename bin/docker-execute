@@ -242,7 +242,8 @@ whoami;
 eval $(ssh-agent);
 ls -la /home/dependabot/.ssh;
 ssh-add /home/dependabot/.ssh/gerrit;
-for c in $(ssh -p 29418 jenkins@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
+less -la /ssh-agent;
+for c in $(ssh -p 29418 gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 gerrit.helpshift.com gerrit review $c --abandon; \
 done;
