@@ -222,7 +222,6 @@ docker run -dit \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:/$CODE_DIR/tmp" \
   -v "${HOME}/.ssh:/home/dependabot/.ssh" \
-  -v "${SSH_AUTH_SOCK}:/ssh-agent" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
   -e PACKAGE_NAME=$PACKAGE_NAME \
@@ -243,6 +242,7 @@ whoami;
 eval $(ssh-agent -s);
 ls -la /home/dependabot/.ssh;
 ssh-add ~/.ssh/id_rsa;
+git clone ssh://gerrit.helpshift.com/aadhar.git;
 for c in $(ssh -p 29418 gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 gerrit.helpshift.com gerrit review $c --abandon; \
