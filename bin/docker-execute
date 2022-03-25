@@ -240,8 +240,8 @@ ls -ald /home/dependabot/dependabot-core;
 ls -ald /home/dependabot/.ssh;
 whoami;
 eval $(ssh-agent -s);
-ls -la /home/dependabot/.ssh;
-ssh-add $(echo $(cat ~/.ssh/config | grep IdentityFile) | cut -d " " -f 2);
+ls -la /home/dependabot/dependabot-core/.ssh;
+ssh-add $(echo $(cat /home/dependabpt/dependabot-core/config | grep IdentityFile) | cut -d " " -f 2);
 for c in $(ssh -p 29418 gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
  do ssh -p 29418 gerrit.helpshift.com gerrit review $c --abandon; \
