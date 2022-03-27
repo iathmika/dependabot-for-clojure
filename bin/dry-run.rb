@@ -42,7 +42,7 @@
 # Check config file structure
 
 require "etc"
-unless Etc.getpwuid(Process.uid).name == "dependabot"
+unless Etc.getpwuid(Process.uid).name == "jenkins"
   puts <<~INFO
     bin/dry-run.rb is only supported in a developerment container.
 
