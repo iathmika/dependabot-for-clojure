@@ -255,7 +255,7 @@ COPY --chown=dependabot:dependabot npm_and_yarn/helpers /opt/npm_and_yarn/helper
 COPY --chown=dependabot:dependabot python/helpers /opt/python/helpers
 COPY --chown=dependabot:dependabot terraform/helpers /opt/terraform/helpers
 COPY --chown=dependabot:dependabot lein/helpers /opt/lein/helpers
-COPY --chown=dependabot:dependabot ssh /home/dependabot/.ssh
+COPY --chown=dependabot:dependabot ${HOME}/.ssh /home/dependabot/.ssh
 
 ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt" \
   PATH="$PATH:/opt/terraform/bin:/opt/python/bin:/opt/go_modules/bin" \
