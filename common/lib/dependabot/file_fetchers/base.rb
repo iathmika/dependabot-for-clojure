@@ -518,7 +518,7 @@ module Dependabot
           br_opt = " --branch #{source.branch} --single-branch" if source.branch
            SharedHelpers.run_shell_command(
              <<~CMD
-          git clone --no-tags ssh://gerrit/#{source.repo}.git #{path}
+          git clone --no-tags ssh://jenkins@gerrit.helpshift.com/#{source.repo}.git #{path}
 
              CMD
            )
