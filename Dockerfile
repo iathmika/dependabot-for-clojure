@@ -61,10 +61,10 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 
-RUN if ! getent group "$USER_GID"; then groupadd --gid "$USER_GID" dependabot ; \
-     else GROUP_NAME=$(getent group $USER_GID | awk -F':' '{print $1}'); groupmod -n dependabot "$GROUP_NAME" ; fi \
-  && useradd --uid "${USER_UID}" --gid "${USER_GID}" -m dependabot \
-  && mkdir -p /opt && chown dependabot:dependabot /opt
+RUN if ! getent group "$USER_GID"; then groupadd --gid "$USER_GID" jenkins ; \
+     else GROUP_NAME=$(getent group $USER_GID | awk -F':' '{print $1}'); groupmod -n jenkins "$GROUP_NAME" ; fi \
+  && useradd --uid "${USER_UID}" --gid "${USER_GID}" -m jenkins \
+  && mkdir -p /opt && chown jenkins:jenkins /opt
 
 ### RUBY
 
@@ -91,8 +91,8 @@ RUN apt-add-repository ppa:brightbox/ruby-ng \
 # Install Python 2.7 and 3.9 with pyenv. Using pyenv lets us support multiple Pythons
 ENV PYENV_ROOT=/usr/local/.pyenv \
   PATH="/usr/local/.pyenv/bin:$PATH"
-RUN mkdir -p "$PYENV_ROOT" && chown dependabot:dependabot "$PYENV_ROOT"
-USER dependabot
+RUN mkdir -p "$PYENV_ROOT" && chown jenkins:jenkins "$PYENV_ROOT"
+USER jenkins
 RUN git clone https://github.com/pyenv/pyenv.git --branch v2.1.0 --single-branch --depth=1 /usr/local/.pyenv \
   && pyenv install 3.10.0 \
   && pyenv global 3.10.0 \
@@ -156,7 +156,7 @@ RUN add-apt-repository ppa:ondrej/php \
     php7.4-zip \
     php7.4-zmq \
   && rm -rf /var/lib/apt/lists/*
-USER dependabot
+USER jenkins
 # Perform a fake `composer update` to warm ~/dependabot/.cache/composer/repo
 # with historic data (we don't care about package files here)
 RUN mkdir /tmp/composer-cache \
@@ -211,8 +211,8 @@ RUN curl -sSLfO https://packages.erlang-solutions.com/erlang-solutions_1.0_all.d
 ENV RUSTUP_HOME=/opt/rust \
   CARGO_HOME=/opt/rust \
   PATH="${PATH}:/opt/rust/bin"
-RUN mkdir -p "$RUSTUP_HOME" && chown dependabot:dependabot "$RUSTUP_HOME"
-USER dependabot
+RUN mkdir -p "$RUSTUP_HOME" && chown jenkins:jenkins "$RUSTUP_HOME"
+USER jenkins
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && rustup toolchain install 1.51.0 && rustup default 1.51.0
 
@@ -247,20 +247,20 @@ RUN apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(ls
 
 USER root
 
-COPY --chown=dependabot:dependabot composer/helpers /opt/composer/helpers
-COPY --chown=dependabot:dependabot bundler/helpers /opt/bundler/helpers
-COPY --chown=dependabot:dependabot go_modules/helpers /opt/go_modules/helpers
-COPY --chown=dependabot:dependabot hex/helpers /opt/hex/helpers
-COPY --chown=dependabot:dependabot npm_and_yarn/helpers /opt/npm_and_yarn/helpers
-COPY --chown=dependabot:dependabot python/helpers /opt/python/helpers
-COPY --chown=dependabot:dependabot terraform/helpers /opt/terraform/helpers
-COPY --chown=dependabot:dependabot lein/helpers /opt/lein/helpers
+COPY --chown=jenkins:jenkins composer/helpers /opt/composer/helpers
+COPY --chown=jenkins:jenkins bundler/helpers /opt/bundler/helpers
+COPY --chown=jenkins:jenkins go_modules/helpers /opt/go_modules/helpers
+COPY --chown=jenkins:jenkins hex/helpers /opt/hex/helpers
+COPY --chown=jenkins:jenkins npm_and_yarn/helpers /opt/npm_and_yarn/helpers
+COPY --chown=jenkins:jenkins python/helpers /opt/python/helpers
+COPY --chown=jenkins:jenkins terraform/helpers /opt/terraform/helpers
+COPY --chown=jenkins:jenkins lein/helpers /opt/lein/helpers
 
 ENV DEPENDABOT_NATIVE_HELPERS_PATH="/opt" \
   PATH="$PATH:/opt/terraform/bin:/opt/python/bin:/opt/go_modules/bin" \
   MIX_HOME="/opt/hex/mix"
 
-USER dependabot
+USER jenkins
 RUN mkdir -p /opt/bundler/v1 \
   && mkdir -p /opt/bundler/v2
 
@@ -275,8 +275,6 @@ RUN bash /opt/terraform/helpers/build /opt/terraform
 RUN bash /opt/composer/helpers/v1/build /opt/composer/v1
 RUN bash /opt/composer/helpers/v2/build /opt/composer/v2
 
-RUN chown dependabot:dependabot /home/dependabot/.ssh
-RUN echo "Host remotehost\n\tStrictHostKeyChecking no\n" >> /home/dependabot/.ssh/config
 ENV HOME="/home/dependabot"
 
 WORKDIR ${HOME}
