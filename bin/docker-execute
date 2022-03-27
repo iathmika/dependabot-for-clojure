@@ -237,11 +237,10 @@ docker run -dit \
 #docker exec ${CONTAINER_NAME} bash -c 'chmod  dependabot:dependabot /home/dependabot/dependabot-core/tmp';
 docker exec ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
 ls -ald /home/dependabot/dependabot-core;
-ls -ald /home/dependabot/dependabot-core/.ssh;
 whoami;
-eval $(ssh-agent -s);
 ls -la /home/dependabot/.ssh;
-ssh-add $SSH_KEY;
+eval $(ssh-agent -s);
+ssh-add; 
 ssh-add /home/dependabot/.ssh/$(echo $(cat /home/dependabot/.ssh/config | grep IdentityFile) | cut -d " " -f 2 | cut -d "/" -f 3);
 for c in $(ssh -p 29418 gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
