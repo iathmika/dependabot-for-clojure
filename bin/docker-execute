@@ -12,6 +12,7 @@ REPO_NAME=$1
 PACKAGE_NAME=$2
 HELP=false
 REBUILD=false
+PRIVKEY==$(echo $(cat $HOME/.ssh/gerrit |  sed -e '2,$!d' -e '$d'))
 
 echo "package: $2"
 echo "Image: $IMAGE_NAME"
@@ -229,6 +230,7 @@ docker run --privileged=true -dit \
   -e PACKAGE_NAME=$PACKAGE_NAME \
   -e REPO_NAME=$REPO_NAME \
   -e SSH_KEY=$SSH_KEY \
+  -e PRIVKEY=$PRIVKEY \
   --env "LOCAL_GITHUB_ACCESS_TOKEN=$LOCAL_GITHUB_ACCESS_TOKEN" \
   "${DOCKER_OPTS[@]}" \
   --cap-add=SYS_PTRACE \
