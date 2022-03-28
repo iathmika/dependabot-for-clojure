@@ -12,12 +12,12 @@ REPO_NAME=$1
 PACKAGE_NAME=$2
 HELP=false
 REBUILD=false
-PRIVKEY==$(echo $(cat $HOME/.ssh/gerrit |  sed -e '2,$!d' -e '$d'))
 
 echo "package: $2"
 echo "Image: $IMAGE_NAME"
 echo "UID: $(id -u)"
 echo "GID: $(id -g)"
+cat ~/.ssh/gerrit > $(pwd)/id_rsa
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
 
@@ -225,12 +225,12 @@ docker run --privileged=true -dit \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:/$CODE_DIR/tmp" \
   -v "${HOME}/.ssh:/home/dependabot/.ssh:ro" \
+  -v "$(pwd)/id_rsa:$CODE_DIR/id_rsa" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
   -e PACKAGE_NAME=$PACKAGE_NAME \
   -e REPO_NAME=$REPO_NAME \
   -e SSH_KEY=$SSH_KEY \
-  -e PRIVKEY=$PRIVKEY \
   --env "LOCAL_GITHUB_ACCESS_TOKEN=$LOCAL_GITHUB_ACCESS_TOKEN" \
   "${DOCKER_OPTS[@]}" \
   --cap-add=SYS_PTRACE \
@@ -247,7 +247,7 @@ echo "GID: $(id -g)"
 whoami;
 ls -la /home/dependabot/.ssh;
 eval $(ssh-agent -s);
-ssh-add $PRIV_KEY;
+ssh-add /home/dependabot/dependabot-core/id_rsa;
 ssh-add /home/dependabot/.ssh/$(echo $(cat /home/dependabot/.ssh/config | grep IdentityFile) | cut -d " " -f 2 | cut -d "/" -f 3);
 for c in $(ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
