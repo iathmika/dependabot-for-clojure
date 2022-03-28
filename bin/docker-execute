@@ -235,15 +235,17 @@ docker run --privileged=true -dit \
   "$IMAGE_NAME" "${CONTAINER_ARGS[@]}"
 
 #docker exec ${CONTAINER_NAME} bash -c 'echo $SSH_AUTH_SOCK'
+echo "Docker exec:-"
 
 #docker exec ${CONTAINER_NAME} bash -c 'chmod  dependabot:dependabot /home/dependabot/dependabot-core/tmp';
-docker exec -u 0 ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
+docker exec ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
 ls -ald /home/dependabot/dependabot-core;
 echo "UID: $(id -u)"
 echo "GID: $(id -g)"
 whoami;
 ls -la /home/dependabot/.ssh;
 eval $(ssh-agent -s);
+ssh-add $PRIV_KEY;
 ssh-add /home/dependabot/.ssh/$(echo $(cat /home/dependabot/.ssh/config | grep IdentityFile) | cut -d " " -f 2 | cut -d "/" -f 3);
 for c in $(ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
