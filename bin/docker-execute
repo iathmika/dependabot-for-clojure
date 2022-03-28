@@ -15,6 +15,8 @@ REBUILD=false
 
 echo "package: $2"
 echo "Image: $IMAGE_NAME"
+echo "UID: $(id -u)"
+echo "GID: $(id -g)"
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
 
@@ -102,7 +104,7 @@ CODE_DIR="/home/dependabot/dependabot-core"
 #HOME="/Users/athmika"
 
 touch .core-bash_history
-docker run -dit \
+docker run --privileged=true -dit \
   -v "$(pwd)/.core-bash_history:/home/dependabot/.bash_history" \
   -v "$(pwd)/.rubocop.yml:$CODE_DIR/.rubocop.yml" \
   -v "$(pwd)/bin:$CODE_DIR/bin" \
@@ -237,11 +239,11 @@ docker run -dit \
 #docker exec ${CONTAINER_NAME} bash -c 'chmod  dependabot:dependabot /home/dependabot/dependabot-core/tmp';
 docker exec ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
 ls -ald /home/dependabot/dependabot-core;
+echo "UID: $(id -u)"
+echo "GID: $(id -g)"
 whoami;
 ls -la /home/dependabot/.ssh;
 eval $(ssh-agent -s);
-ssh-add; 
-chmod 400 /home/dependabot/.ssh;
 ssh-add /home/dependabot/.ssh/$(echo $(cat /home/dependabot/.ssh/config | grep IdentityFile) | cut -d " " -f 2 | cut -d "/" -f 3);
 ssh -vv -p 29418 jenkins@gerrit.helpshift.com;
 for c in $(ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
