@@ -818,7 +818,7 @@ puts "running rfc"
 #push the commits to gerrit via rfc
 Dir.chdir($repo_contents_path) do
   #system("/home/dependabot/rfc feature/dependabot")
- # system("git push origin HEAD:refs/for/feature/dependabot")
+ system("git push origin HEAD:refs/for/feature/dependabot")
 end
 
 #StackProf.stop if $options[:profile]
