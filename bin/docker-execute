@@ -15,9 +15,7 @@ REBUILD=false
 
 echo "package: $2"
 echo "Image: $IMAGE_NAME"
-echo "UID: $(id -u)"
-echo "GID: $(id -g)"
-cat ~/.ssh/gerrit > $(pwd)/id_rsa
+cat ~/.ssh/id_rsa  > $(pwd)/id_rsa
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
 
@@ -242,8 +240,6 @@ echo "Container running.."
 #docker exec ${CONTAINER_NAME} bash -c 'chmod  dependabot:dependabot /home/dependabot/dependabot-core/tmp';
 docker exec ${CONTAINER_NAME} bash -c 'ls -ald /home/dependabot/dependabot-core/tmp;
 ls -ald /home/dependabot/dependabot-core;
-echo "UID: $(id -u)"
-echo "GID: $(id -g)"
 whoami;
 eval $(ssh-agent -s);
 ssh-add /home/dependabot/dependabot-core/id_rsa;
