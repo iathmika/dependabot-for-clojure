@@ -223,7 +223,7 @@ docker run --privileged=true -dit \
   -v "$(pwd)/omnibus/lib:$CODE_DIR/omnibus/lib" \
   -v "$(pwd)/omnibus/spec:$CODE_DIR/omnibus/spec" \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
-  -v "$(pwd)/tmp:/$CODE_DIR/tmp" \
+  -v "$(pwd)/tmp:$CODE_DIR/tmp" \
   -v "${HOME}/.ssh:/home/dependabot/.ssh:ro" \
   -v "$(pwd)/id_rsa:$CODE_DIR/id_rsa" \
   --name "$CONTAINER_NAME" \
