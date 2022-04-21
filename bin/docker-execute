@@ -17,8 +17,6 @@ echo "package: $2"
 echo "Image: $IMAGE_NAME"
 echo "UID: $(id -u)"
 echo "GID: $(id -g)"
-rm -rf $(pwd)/id_rsa
-cat ~/.ssh/gerrit > $(pwd)/id_rsa
 
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
@@ -112,7 +110,7 @@ export DOCKER_GID=$(id -g)
 
 touch .core-bash_history
 docker run --privileged=true -dit \
-       --user $DOCKER_UID:$DOCKER_GID \
+       --user 0 \
   -v "/etc/group:/etc/group:ro" \
   -v "/etc/passwd:/etc/passwd:ro" \
   -v "/etc/shadow:/etc/shadow:ro" \
@@ -235,7 +233,6 @@ docker run --privileged=true -dit \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:$CODE_DIR/tmp" \
   -v "$(pwd)/ssh:/home/dependabot/.ssh" \
-  -v "$(pwd)/id_rsa:$CODE_DIR/id_rsa" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
   -e PACKAGE_NAME=$PACKAGE_NAME \
