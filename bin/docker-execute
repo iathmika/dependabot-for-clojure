@@ -17,6 +17,7 @@ echo "package: $2"
 echo "Image: $IMAGE_NAME"
 echo "UID: $(id -u)"
 echo "GID: $(id -g)"
+rm -rf $(pwd)/id_rsa
 cat ~/.ssh/gerrit > $(pwd)/id_rsa
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
