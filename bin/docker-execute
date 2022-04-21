@@ -256,11 +256,10 @@ echo "UID: $(id -u)"
 echo "GID: $(id -g)"
 whoami;
 eval $(ssh-agent -s);
-ssh-add /home/dependabot/dependabot-core/id_rsa;
 ssh-add /home/dependabot/.ssh/$(echo $(cat /home/dependabot/.ssh/config | grep IdentityFile) | cut -d " " -f 2 | cut -d "/" -f 3);
 for c in $(ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit query --current-patch-set project:${REPO_NAME} branch:feature/dependabot | grep revision | tr -s " " | cut -d " " -f 3); \
 
- do ssh -p 29418 jenkins@gerrit.helpshift.com gerrit review $c --abandon; \
+ do ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit review $c --abandon; \
 done;
 
 bin/dry-run.rb --provider gerrit $PACKAGE_NAME $REPO_NAME'
