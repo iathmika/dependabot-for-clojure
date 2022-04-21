@@ -106,6 +106,7 @@ CODE_DIR="/home/dependabot/dependabot-core"
 
 touch .core-bash_history
 docker run --privileged=true -dit \
+  --user $(id -u) \
   -v "$(pwd)/.core-bash_history:/home/dependabot/.bash_history" \
   -v "$(pwd)/.rubocop.yml:$CODE_DIR/.rubocop.yml" \
   -v "$(pwd)/bin:$CODE_DIR/bin" \
