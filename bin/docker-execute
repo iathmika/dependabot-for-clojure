@@ -104,12 +104,12 @@ echo "$(tput setaf 2)=> running docker development shell$(tput sgr0)"
 CODE_DIR="/home/dependabot/dependabot-core"
 #HOME="/Users/athmika"
 
-export UID=$(id -u)
-export GID=$(id -g)
+export DOCKER_UID=$(id -u)
+export DOCKER_GID=$(id -g)
 
 touch .core-bash_history
 docker run --privileged=true -dit \
-       --user $UID:$GID \
+       --user $DOCKER_UID:$DOCKER_GID \
   -v "/etc/group:/etc/group:ro" \
   -v "/etc/passwd:/etc/passwd:ro" \
   -v "/etc/shadow:/etc/shadow:ro" \
