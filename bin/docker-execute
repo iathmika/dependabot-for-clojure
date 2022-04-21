@@ -19,6 +19,7 @@ echo "UID: $(id -u)"
 echo "GID: $(id -g)"
 rm -rf $(pwd)/id_rsa
 cat ~/.ssh/gerrit > $(pwd)/id_rsa
+
 # Enable docker buildkit with inline cache builds
 export DOCKER_BUILDKIT=1
 
@@ -104,6 +105,7 @@ fi
 echo "$(tput setaf 2)=> running docker development shell$(tput sgr0)"
 CODE_DIR="/home/dependabot/dependabot-core"
 #HOME="/Users/athmika"
+cp -r ${HOME}/.ssh $(pwd)/ssh
 
 export DOCKER_UID=$(id -u)
 export DOCKER_GID=$(id -g)
@@ -232,7 +234,7 @@ docker run --privileged=true -dit \
   -v "$(pwd)/omnibus/spec:$CODE_DIR/omnibus/spec" \
   -v "$(pwd)/omnibus/script:$CODE_DIR/omnibus/script" \
   -v "$(pwd)/tmp:$CODE_DIR/tmp" \
-  -v "${HOME}/.ssh:/home/dependabot/.ssh:ro" \
+  -v "$(pwd)/ssh:/home/dependabot/.ssh" \
   -v "$(pwd)/id_rsa:$CODE_DIR/id_rsa" \
   --name "$CONTAINER_NAME" \
   -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK \
