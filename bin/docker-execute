@@ -259,7 +259,8 @@ for c in $(ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.c
  do ssh -p 29418 -o "StrictHostKeyChecking no" jenkins@gerrit.helpshift.com gerrit review $c --abandon; \
 done;
 
-bin/dry-run.rb --provider gerrit $PACKAGE_NAME $REPO_NAME'
+bin/dry-run.rb --provider gerrit $PACKAGE_NAME $REPO_NAME;
+rm -rf /home/dependabot/dependabot-core/tmp/$REPO_NAME'
 
 #echo "Running dependabot for $1"
 rm -f $(pwd)/id_rsa
