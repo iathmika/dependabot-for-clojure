@@ -109,7 +109,7 @@ export DOCKER_UID=$(id -u)
 export DOCKER_GID=$(id -g)
 
 touch .core-bash_history
-docker run --privileged=true -dit \
+docker run -dit --rm \
        --user "$(id -u):$(id -g)" \
   -v "/etc/group:/etc/group:ro" \
   -v "/etc/passwd:/etc/passwd:ro" \
